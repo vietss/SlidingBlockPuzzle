@@ -14,7 +14,11 @@ public class GridManager : MonoBehaviour
 
     public GameObject cellPrefab;
 
-    public Block[,] grid; 
+    public GameObject cellExit;
+
+    public Block[,] grid;
+
+    public Vector2Int exitCell;
     void Awake()
     {
         Instance = this;
@@ -25,6 +29,7 @@ public class GridManager : MonoBehaviour
     void Start()
     {
         GenerateGrid();
+        InsCellExit();
     }
     void GenerateGrid()
     {
@@ -39,6 +44,14 @@ public class GridManager : MonoBehaviour
                 cell.transform.parent = transform;
             }
         }
+    }
+    void InsCellExit()
+    {
+        GameObject cellExitTrans = Instantiate(cellExit, new Vector3Int(exitCell.x, exitCell.y, 0), Quaternion.identity);
+
+        cellExitTrans.transform.position = new Vector3(cellExitTrans.transform.position.x * cellSize + cellSize, cellExitTrans.transform.position.y * cellSize + cellSize / 2f);
+
+        cellExitTrans.transform.localScale = new Vector3(cellSize * 0.1f, cellSize, 1);
     }
     public bool IsInsideGrid(int x, int y)
     {

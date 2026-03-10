@@ -14,9 +14,12 @@ public class Block : MonoBehaviour
 
     public Vector2Int gridPos;
 
+    public bool isTarget = false;
+
     // Start is called before the first frame update
     void Start()
     {
+        RandomColor();
         SetupBlock();
     }
 
@@ -25,6 +28,28 @@ public class Block : MonoBehaviour
     {
         
     }
+    void RandomColor()
+    {
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        if(!isTarget)
+        {
+            float h = Random.Range(0f, 1f);
+
+            while (h < 0.05f || h > 0.95f)
+            {
+                h = Random.Range(0f, 1f);
+            }
+
+            float s = Random.Range(0.6f, 1f);
+            float v = Random.Range(0.7f, 1f);
+
+            sr.color = Color.HSVToRGB(h, s, v);
+        }
+        else
+            sr.color = Color.red;
+
+
+    }    
     void SetupBlock()
     {
         // scale sprite theo grid
@@ -54,6 +79,8 @@ public class Block : MonoBehaviour
         OccupyCells();
 
         UpdateWorldPosition();
+
+        CheckWin();
     }
     bool CanMove(Vector2Int pos)
     {
@@ -64,8 +91,16 @@ public class Block : MonoBehaviour
                 int checkX = pos.x + x;
                 int checkY = pos.y + y;
 
+                Debug.Log("x: " + checkX + " " + GridManager.Instance.exitCell.x + " y " + checkY + " " + (GridManager.Instance.exitCell.y + 0.5f));
+                
+
                 if (!GridManager.Instance.IsInsideGrid(checkX, checkY))
+                {
+                    if (isTarget && checkX >= GridManager.Instance.exitCell.x && checkY == GridManager.Instance.exitCell.y)
+                        continue;
+
                     return false;
+                }
 
                 Block other = GridManager.Instance.grid[checkX, checkY];
 
@@ -83,10 +118,17 @@ public class Block : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                GridManager.Instance.SetCell(gridPos.x + x, gridPos.y + y, this);
+                int gx = gridPos.x + x;
+                int gy = gridPos.y + y;
+
+                if (GridManager.Instance.IsInsideGrid(gx, gy))
+                {
+                    GridManager.Instance.SetCell(gx, gy, this);
+                }
             }
         }
     }
+
 
     void ClearCells()
     {
@@ -94,12 +136,27 @@ public class Block : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                GridManager.Instance.ClearCell(gridPos.x + x, gridPos.y + y);
+                int gx = gridPos.x + x;
+                int gy = gridPos.y + y;
+
+                if (GridManager.Instance.IsInsideGrid(gx, gy))
+                {
+                    GridManager.Instance.ClearCell(gx, gy);
+                }
             }
         }
     }
 
-    
+    void CheckWin()
+    {
+        if (!isTarget) return;
+
+        if (gridPos.x >= GridManager.Instance.width)
+        {
+            Time.timeScale = 0;
+            Debug.Log("YOU WIN!");
+        }
+    }
     void OnMouseDown()
     {
         startMouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
