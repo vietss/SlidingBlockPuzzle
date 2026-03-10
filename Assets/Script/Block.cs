@@ -10,15 +10,7 @@ public class Block : MonoBehaviour
 
     public int height = 1;
 
-    public bool moveHorizontal = true;
-
-    public bool moveVertical = false;
-
     Vector3 startMouse;
-
-    bool axisLocked = false;
-
-    bool horizontalMove;
 
     public Vector2Int gridPos;
 
@@ -37,24 +29,77 @@ public class Block : MonoBehaviour
     {
         // scale sprite theo grid
         transform.localScale = new Vector3(width, height, 1);
-
-        // chỉnh collider
-
         // cập nhật position theo grid
         UpdateWorldPosition();
     }
 
     public void UpdateWorldPosition()
     {
-        transform.position = new Vector3(gridPos.x + width / 2f,gridPos.y + height / 2f,0);
+        float cell = GridManager.Instance.cellSize;
+
+        transform.position = new Vector3(gridPos.x * cell + width * cell / 2f,gridPos.y * cell + height * cell / 2f,0);
     }
 
     public void Move(Vector2Int dir)
     {
-        gridPos += dir;
+        Vector2Int newPos = gridPos + dir;
+
+        if (!CanMove(newPos))
+            return;
+
+        ClearCells();
+
+        gridPos = newPos;
+
+        OccupyCells();
+
         UpdateWorldPosition();
     }
+    bool CanMove(Vector2Int pos)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                int checkX = pos.x + x;
+                int checkY = pos.y + y;
 
+                if (!GridManager.Instance.IsInsideGrid(checkX, checkY))
+                    return false;
+
+                Block other = GridManager.Instance.grid[checkX, checkY];
+
+                if (other != null && other != this)
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    void OccupyCells()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                GridManager.Instance.SetCell(gridPos.x + x, gridPos.y + y, this);
+            }
+        }
+    }
+
+    void ClearCells()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                GridManager.Instance.ClearCell(gridPos.x + x, gridPos.y + y);
+            }
+        }
+    }
+
+    
     void OnMouseDown()
     {
         startMouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -66,19 +111,6 @@ public class Block : MonoBehaviour
     {
         Vector3 currentMousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector3 delta = currentMousePos - startMouse;
-
-        // khóa trục khi bắt đầu kéo
-        //if (!axisLocked)
-        //{
-        //    if (Mathf.Abs(delta.x) > 0.2f || Mathf.Abs(delta.y) > 0.2f)
-        //    {
-        //        horizontalMove = Mathf.Abs(delta.x) > Mathf.Abs(delta.y);
-        //        axisLocked = true;
-        //    }
-        //}
-
-        //if (!axisLocked)
-        //    return;
 
         Vector2Int dir = Vector2Int.zero;
 

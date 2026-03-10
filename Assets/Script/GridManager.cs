@@ -13,9 +13,13 @@ public class GridManager : MonoBehaviour
     public float cellSize = 1f;
 
     public GameObject cellPrefab;
+
+    public Block[,] grid; 
     void Awake()
     {
         Instance = this;
+
+        grid = new Block[width, height];
     }
     // Start is called before the first frame update
     void Start()
@@ -28,12 +32,31 @@ public class GridManager : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                Vector3 pos = new Vector3(x * cellSize,y * cellSize,0);
+                Vector3 pos = new Vector3(x * cellSize + cellSize / 2f, y * cellSize + cellSize / 2f, 0);
 
                 GameObject cell = Instantiate(cellPrefab, pos, Quaternion.identity);
 
                 cell.transform.parent = transform;
             }
         }
+    }
+    public bool IsInsideGrid(int x, int y)
+    {
+        return x >= 0 && y >= 0 && x < width && y < height;
+    }
+
+    public bool IsCellEmpty(int x, int y)
+    {
+        return grid[x, y] == null;
+    }
+
+    public void SetCell(int x, int y, Block block)
+    {
+        grid[x, y] = block;
+    }
+
+    public void ClearCell(int x, int y)
+    {
+        grid[x, y] = null;
     }
 }
