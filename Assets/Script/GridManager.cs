@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -31,6 +31,7 @@ public class GridManager : MonoBehaviour
         GenerateGrid();
         InsCellExit();
     }
+    //Spawn ra Grid
     void GenerateGrid()
     {
         for (int x = 0; x < width; x++)
@@ -45,6 +46,7 @@ public class GridManager : MonoBehaviour
             }
         }
     }
+    // thêm GameObject thể hiện đó là lối thoát
     void InsCellExit()
     {
         GameObject cellExitTrans = Instantiate(cellExit, new Vector3Int(exitCell.x, exitCell.y, 0), Quaternion.identity);
@@ -53,21 +55,17 @@ public class GridManager : MonoBehaviour
 
         cellExitTrans.transform.localScale = new Vector3(cellSize * 0.1f, cellSize, 1);
     }
+    // check xem có nằm trong grid không
     public bool IsInsideGrid(int x, int y)
     {
         return x >= 0 && y >= 0 && x < width && y < height;
     }
-
-    public bool IsCellEmpty(int x, int y)
-    {
-        return grid[x, y] == null;
-    }
-
+    // dùng để ghi lại vị trí vừa di chuyển đến 
     public void SetCell(int x, int y, Block block)
     {
         grid[x, y] = block;
     }
-
+    // dùng để xóa những ô vừa có Block nằm ở đó
     public void ClearCell(int x, int y)
     {
         grid[x, y] = null;

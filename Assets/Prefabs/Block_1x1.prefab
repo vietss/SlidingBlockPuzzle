@@ -102,6 +102,7 @@ MonoBehaviour:
   height: 1
   gridPos: {x: 0, y: 0}
   isTarget: 0
+  moveType: 2
 --- !u!61 &2609457983181858742
 BoxCollider2D:
   m_ObjectHideFlags: 0

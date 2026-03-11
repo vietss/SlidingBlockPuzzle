@@ -16,6 +16,9 @@ public class Block : MonoBehaviour
 
     public bool isTarget = false;
 
+    public MoveType moveType = MoveType.Free;
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -28,6 +31,7 @@ public class Block : MonoBehaviour
     {
         
     }
+    // hàm random màu sắc cho Block
     void RandomColor()
     {
         SpriteRenderer sr = GetComponent<SpriteRenderer>();
@@ -50,7 +54,7 @@ public class Block : MonoBehaviour
 
 
     }    
-    void SetupBlock()
+    public void SetupBlock()
     {
         // scale sprite theo grid
         transform.localScale = new Vector3(width, height, 1);
@@ -63,10 +67,16 @@ public class Block : MonoBehaviour
         float cell = GridManager.Instance.cellSize;
 
         transform.position = new Vector3(gridPos.x * cell + width * cell / 2f,gridPos.y * cell + height * cell / 2f,0);
-    }
+    } 
 
     public void Move(Vector2Int dir)
     {
+        if (moveType == MoveType.Horizontal && dir.y != 0)
+            return;
+
+        if (moveType == MoveType.Vertical && dir.x != 0)
+            return;
+
         Vector2Int newPos = gridPos + dir;
 
         if (!CanMove(newPos))
@@ -82,6 +92,7 @@ public class Block : MonoBehaviour
 
         CheckWin();
     }
+    // check xem có thể di chuyển được không
     bool CanMove(Vector2Int pos)
     {
         for (int x = 0; x < width; x++)
@@ -111,8 +122,8 @@ public class Block : MonoBehaviour
 
         return true;
     }
-
-    void OccupyCells()
+    // ghi lại vị trí mới
+    public void OccupyCells()
     {
         for (int x = 0; x < width; x++)
         {
@@ -129,7 +140,7 @@ public class Block : MonoBehaviour
         }
     }
 
-
+    // xóa vị trí cũ của Block
     void ClearCells()
     {
         for (int x = 0; x < width; x++)
@@ -146,7 +157,7 @@ public class Block : MonoBehaviour
             }
         }
     }
-
+    // check xem user win chưa
     void CheckWin()
     {
         if (!isTarget) return;
@@ -154,11 +165,13 @@ public class Block : MonoBehaviour
         if (gridPos.x >= GridManager.Instance.width)
         {
             Time.timeScale = 0;
+            GameManager.Instance.TextWin.gameObject.SetActive(true);
             Debug.Log("YOU WIN!");
         }
     }
     void OnMouseDown()
     {
+        if (Time.timeScale == 0) return;
         startMouse = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
         //axisLocked = false;
@@ -166,6 +179,7 @@ public class Block : MonoBehaviour
 
     void OnMouseDrag()
     {
+        if (Time.timeScale == 0) return;
         Vector3 currentMousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector3 delta = currentMousePos - startMouse;
 
@@ -199,8 +213,11 @@ public class Block : MonoBehaviour
         }
     }
 
-    void OnMouseUp()
+    public enum MoveType
     {
-        //axisLocked = false; 
+        Horizontal,
+        Vertical,
+        Free
     }
+
 }
